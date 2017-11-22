@@ -57,19 +57,30 @@ for t in range(timesteps):
 
     with tf.name_scope('encoder1_t'+str(t)) as scope:
         encoder1_ff = tf.add(tf.matmul(x, architecture[0]['ffw'], name="ffmul"), architecture[0]['b'])
-        encoder1_fb = 1 
+        
         if t != 0 and architecture[0]['fbw'].shape[0] != 0: 
             encoder1_fb = tf.matmul(tf.concat([prev_activations[conn] for conn in fb_connections[0]], 1), architecture[0]['fbw'], name="fbmul")
-
-        activations[0] = tf.multiply(comp_feedback(encoder1_fb), tf.nn.relu(encoder1_ff), name="appfbmul")
+            activations[0] = tf.multiply(comp_feedback(encoder1_fb), tf.nn.relu(encoder1_ff), name="appfbmul")
+        else: 
+            activations[0] = tf.nn.relu(encoder1_ff)
 
     with tf.name_scope('encoder2_t'+str(t)) as scope:
         encoder2_ff = tf.add(tf.matmul(activations[0], architecture[1]['ffw']), architecture[1]['b'])
-        activations[1] = tf.nn.relu(encoder2_ff)
+        
+        if t != 0 and architecture[1]['fbw'].shape[0] != 0: 
+            encoder2_fb = tf.matmul(tf.concat([prev_activations[conn] for conn in fb_connections[1]], 1), architecture[1]['fbw'], name="fbmul")
+            activations[1] = tf.multiply(comp_feedback(encoder2_fb), tf.nn.relu(encoder2_ff), name="appfbmul")
+        else: 
+            activations[1] = tf.nn.relu(encoder2_ff)
 
     with tf.name_scope('decoder1_t'+str(t)) as scope:
         decoder1_ff = tf.add(tf.matmul(activations[1], architecture[2]['ffw']), architecture[2]['b'])
-        activations[2] = tf.nn.relu(decoder1_ff)
+        
+        if t != 0 and architecture[2]['fbw'].shape[0] != 0: 
+            decoder1_fb = tf.matmul(tf.concat([prev_activations[conn] for conn in fb_connections[2]], 1), architecture[2]['fbw'], name="fbmul")
+            activations[2] = tf.multiply(comp_feedback(decoder1_fb), tf.nn.relu(decoder1_ff), name="appfbmul")
+        else: 
+            activations[2] = tf.nn.relu(decoder1_ff)
 
     with tf.name_scope('decoder2_t'+str(t)) as scope:
         decoder2_ff = tf.add(tf.matmul(activations[2], architecture[3]['ffw']), architecture[3]['b'])
