@@ -24,7 +24,6 @@ restore_model = False
 num_steps = 100000
 batch_size = 128
 print_every = 100 # print loss every 100 epochs
-num_reconstr_digits = 10 # how many reconstructed digits to display at the end
 
 # network parameters
 beta_max = 0.9
